@@ -15,6 +15,7 @@ from adapters.executor import get_executor
 from adapters.gateway import resolve_gateway_endpoint
 from adapters.usage_store import get_usage_store_adapter
 from core.lifecycle import start_service, stop_service, tail_log
+from core.log_args import LogArgumentsError, parse_log_arguments
 from core.health import check_deployment_health
 from core.acceptance import run_acceptance_test
 from core.platform_state import build_platform_state
@@ -73,7 +74,7 @@ if len(sys.argv) < 2:
     print("  start      Start the AI deployment")
     print("  stop       Stop the AI deployment")
     print("  restart    Restart the AI deployment")
-    print("  logs       Show recent service logs")
+    print("  logs       Show recent logs [service_id] [--lines N | -n N]")
 
 elif sys.argv[1] == "inspect":
     hardware = inspect_hardware()
@@ -427,18 +428,27 @@ elif sys.argv[1] == "restart":
         sys.exit(1)
 
 elif sys.argv[1] == "logs":
+    try:
+        requested_service, requested_lines = parse_log_arguments(
+            sys.argv[2:]
+        )
+    except LogArgumentsError as error:
+        print(
+            f"Invalid logs arguments: {error}",
+            file=sys.stderr,
+        )
+        print(
+            "Usage: ./ai logs [service_id] [--lines N | -n N]",
+            file=sys.stderr,
+        )
+        sys.exit(2)
+
     config = load_config()
     plan = build_initial_plan()
 
     manifest = build_deployment_manifest(
         plan,
         config
-    )
-
-    requested_service = (
-        sys.argv[2]
-        if len(sys.argv) >= 3
-        else None
     )
 
     enabled_services = [
@@ -476,7 +486,7 @@ elif sys.argv[1] == "logs":
 
         output = tail_log(
             service_id,
-            lines=40,
+            lines=requested_lines,
         )
 
         if output:
