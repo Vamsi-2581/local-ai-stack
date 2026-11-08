@@ -7,17 +7,40 @@
 
 # Local AI Stack
 
-Run private AI on your own GPU servers: model discovery, capacity planning, fast local inference, a secure gateway and a control plane, so sensitive data never leaves your infrastructure.
+**End-to-end private AI on idle GPUs you already have, or on one server you buy.**
 
-**Local AI Stack** turns a GPU host into a managed local AI stack: discover models, plan capacity, deploy inference + chat UI + gateway, observe usage, and operate the control plane from a CLI and HTTP Platform API. The longer-term product vision is a portable **Company Brain** layer over that stack (see [`docs/PRODUCT_VISION.md`](docs/PRODUCT_VISION.md)); this repository’s working code is the deployment and control-plane foundation.
+Local AI Stack turns a Linux GPU host you control into a complete private AI path: discover models, check capacity, run inference (vLLM), open a chat UI (Open WebUI), put an OpenAI-compatible gateway in front, keep usage analytics local, and operate it all from a CLI and HTTP Platform API. It is an assembled stack (control plane plus replaceable adapters), not a single chat app.
 
-The clean-slate **Company Brain** doctrine and rebuild plan live in [docs/planning](docs/planning/).
+### Why
 
-> **Status:** Prototypes and vertical slices through Phase 8+ capacity / resource work are implemented; many settings remain provisional (see [`docs/PROVISIONAL.md`](docs/PROVISIONAL.md) and [`docs/ROADMAP.md`](docs/ROADMAP.md)). Treat this as an early open-source release, not a finished commercial appliance.
+- **Cloud inference becomes a permanent bill.** Once pilots move to usage-based pricing, inference turns into the main line item ([VentureBeat, May 2026](https://venturebeat.com/infrastructure/5-gpu-utilization-the-401-billion-ai-infrastructure-problem-enterprises-cant-keep-ignoring)).
+- **A lot of GPU capacity already bought sits idle.** The same VentureBeat piece reports average enterprise GPU utilisation of around 5% in the audits it cites. Google notes that idle provisioned machines are part of the real footprint of AI inference ([Google Cloud, Aug 2025](https://cloud.google.com/blog/products/infrastructure/measuring-the-environmental-impact-of-ai-inference/)).
+- **New AI data centres are slow and contested.** Local opposition over water, energy, noise and power prices has blocked or delayed many projects ([Forbes, Jul 2026](https://www.forbes.com/sites/robertszczerba/2026/07/22/130-billion-in-ai-data-centers-stalled-the-bottleneck-is-consent/); on water use see [IEEE Spectrum, Sep 2025](https://spectrum.ieee.org/ai-water-usage)).
 
-**Live demos:** [clickable design demo](https://local-ai-stack-demo.vercel.app) with sample data (no backend). The real stack still runs on your own GPU host. Related: [askwuai.com](https://askwuai.com) (children’s app).
+For many workloads there is a simpler option: use the GPU server you already have, or buy one dedicated box, and run the stack there. These figures describe the market, not measurements of this project.
 
-Want to help without a GPU? See **[Contribute without a GPU](CONTRIBUTING.md#contribute-without-a-gpu)** — unit tests and many issues need only Python 3.12+.
+**Privacy:** traffic stays on infrastructure you control: a machine you own, a colo you rent, or a single rented GPU host. That is your tenancy, not "no provider ever".
+
+> **Status:** Early open-source release ([v0.1.0](https://github.com/dlealvilla/local-ai-stack/releases)). The path that works today is **Linux + NVIDIA + vLLM**. Prototypes and vertical slices through Phase 8+ capacity / resource work are implemented; many settings remain provisional (see [`docs/PROVISIONAL.md`](docs/PROVISIONAL.md) and [`docs/ROADMAP.md`](docs/ROADMAP.md)). Not a finished commercial appliance.
+
+**Design demo (mock UI only):** [local-ai-stack-demo.vercel.app](https://local-ai-stack-demo.vercel.app) uses sample data and is not connected to a model or GPU. The real stack runs on your own GPU host.
+
+Want to help without a GPU? See **[Contribute without a GPU](CONTRIBUTING.md#contribute-without-a-gpu)**. Unit tests (`python3 -m unittest discover -s tests -v`) and many issues need only Python 3.12+.
+
+### What you get today vs planned
+
+| Area | Today | Planned |
+| --- | --- | --- |
+| Hardware | NVIDIA reference path (`nvidia-smi`) | Additive AMD / ROCm adapters, NVIDIA stays ([#31](https://github.com/dlealvilla/local-ai-stack/issues/31)) |
+| Inference | vLLM (process or Docker executor) | Wider inference adapters, e.g. Ollama-compatible sources (vision only, not shipped) |
+| Chat UI | Open WebUI, routed through the gateway | LibreChat as an alternative frontend ([#26](https://github.com/dlealvilla/local-ai-stack/issues/26)) |
+| Gateway | Builtin OpenAI-compatible proxy | External API routing (roadmap) |
+| Models | Local files + Hugging Face | |
+| Ops | `./ai` CLI, Platform API, local usage analytics | First-party admin UI (roadmap; the demo is mock only) |
+
+### Longer-term direction
+
+Local AI Stack is meant to be the **private compute layer** of a company brain: where models run, on hardware you control. The other half, the **knowledge layer** that decides what AI is allowed to see, is separate work in [Ankla](https://ankla.io). There is no Ankla integration in this repository today. More background: [`docs/PRODUCT_VISION.md`](docs/PRODUCT_VISION.md) and planning docs in [docs/planning](docs/planning/).
 
 ---
 
@@ -130,7 +153,7 @@ The remote has many experiment / checkpoint / phase branches (~97). The **defaul
 
 ## Screenshots
 
-Self-hosted CLI / Platform API screenshots are not bundled yet. Related public product UI: [askwuai.com](https://askwuai.com).
+Self-hosted CLI / Platform API screenshots are not bundled yet. The [design demo](https://local-ai-stack-demo.vercel.app) shows the planned UI with mock data.
 
 ---
 
@@ -142,7 +165,6 @@ Active R&D / early open release candidate. Read `docs/ROADMAP.md` for completed 
 
 ## More from Daniel
 
-- Company Brain rebuild doctrine (docs-only): [docs/planning](docs/planning/)
 - Children’s learning app (live): [https://askwuai.com](https://askwuai.com) — source: [ask-wuai](https://github.com/dlealvilla/ask-wuai)
 - Public LMS writing prototype (source): [wildmind-ai-for-education](https://github.com/dlealvilla/wildmind-ai-for-education)
 
