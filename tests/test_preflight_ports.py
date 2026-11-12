@@ -79,4 +79,4 @@ class PreflightPortTests(unittest.TestCase):
 if __name__ == "__main__":
   unittest.main()
 
-if __nif __name__ == "__main__":
+if __name__ == "__main__":
