@@ -76,7 +76,5 @@ class PreflightPortTests(unittest.TestCase):
             )
 
         self.assertEqual([("127.0.0.1", 8000)], [call.args for call in mock_port.call_args_list])
-if __name__ == "__main__":
+if__name__ == "__main__":
   unittest.main()
-
-if __name__ == "__main__":
