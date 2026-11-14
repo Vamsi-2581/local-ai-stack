@@ -38,7 +38,8 @@ class LibreChatFrontendTests(unittest.TestCase):
 
     def test_build_service_spec_enabled_and_disabled(self):
         config = self._sample_config()
-        plan = {"frontend": {"enabled": True, "provider": "librechat"}}
+        config["gateway"] = {"host": "127.0.0.1", "port": 8080}
+        plan = {"frontend": {"enabled": True, "provider": "librechat"}, "gateway": {"enabled": True, "provider": "builtin"}}
         spec = build_service_spec(plan, config)
         self.assertIsNotNone(spec)
         self.assertEqual(spec["provider"], "librechat")
@@ -95,7 +96,7 @@ class LibreChatFrontendTests(unittest.TestCase):
                     "role": "inference",
                     "provider": "vllm",
                     "enabled": True,
-                    "spec": {"network": {"host": "127.0.0.1", "port": 8000}, "model_path": "/models/test"},
+                    "spec": {"model": {"path": "/workspace/models/m", "served_name": "m"}, "network": {"host": "127.0.0.1", "port": 8000}, "performance": {"context_length": 4096, "gpu_memory_utilization": 0.9}},
                 },
                 {
                     "role": "frontend",
