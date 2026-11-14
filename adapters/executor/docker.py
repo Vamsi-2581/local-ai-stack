@@ -176,8 +176,8 @@ class DockerExecutor:
                 )
 
             elif service["role"] == "frontend":
-                 commands.extend(self.build_frontend_commands(service, manifest))
-                continue
+                commands.extend(self.build_frontend_commands(service, manifest))
+                 continue
             
             else:
                 raise ValueError(
