@@ -137,7 +137,7 @@ def check_service_health(service):
             ),
         }
 
-  if provider in ("openwebui", "librechat"):
+    if provider in ("openwebui", "librechat"):
         result = http_get(
             base_url
         )
