@@ -39,7 +39,7 @@ class LibreChatFrontendTests(unittest.TestCase):
     def test_build_service_spec_enabled_and_disabled(self):
         config = self._sample_config()
         config["gateway"] = {"host": "127.0.0.1", "port": 8080}
-        plan = {"frontend": {"enabled": True, "provider": "librechat"}, "gateway": {"enabled": True, "provider": "builtin"}}
+        plan = {"frontend": {"enabled": True, "provider": "librechat"}, "gateway": {"enabled": True, "provider": "builtin_proxy"}}
         spec = build_service_spec(plan, config)
         self.assertIsNotNone(spec)
         self.assertEqual(spec["provider"], "librechat")
@@ -72,6 +72,7 @@ class LibreChatFrontendTests(unittest.TestCase):
                     "enabled": True,
                     "provider": "librechat",
                     "spec": {
+                        "provider": "librechat", 
                         "network": {"host": "127.0.0.1", "port": 3080},
                         "upstream": GATEWAY_URL,
                         "data_dir": "/var/lib/ai-stack/librechat-data",
