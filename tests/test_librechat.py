@@ -52,8 +52,9 @@ class LibreChatFrontendTests(unittest.TestCase):
 
     def test_write_and_render_librechat_config(self):
         with tempfile.TemporaryDirectory() as tmpdir:
+            data_dir = os.path.join(tmpdir, "librechat-data")
             config_path = os.path.join(tmpdir, "librechat-data", "librechat.yaml")
-            write_librechat_config(config_path, GATEWAY_URL)
+            write_librechat_config( data_dir,GATEWAY_URL)
             content = Path(config_path).read_text(encoding="utf-8")
             self.assertIn(f'baseURL: "{GATEWAY_URL}/v1"', content)
 
@@ -67,6 +68,7 @@ class LibreChatFrontendTests(unittest.TestCase):
             "services": [
                 {
                     "role": "frontend",
+                    "enabled": True,
                     "provider": "librechat",
                     "spec": {
                         "network": {"host": "127.0.0.1", "port": 3080},
@@ -92,10 +94,12 @@ class LibreChatFrontendTests(unittest.TestCase):
                 {
                     "role": "inference",
                     "provider": "vllm",
+                    "enabled": True,
                     "spec": {"network": {"host": "127.0.0.1", "port": 8000}, "model_path": "/models/test"},
                 },
                 {
                     "role": "frontend",
+                    "enabled": True,
                     "provider": "openwebui",
                     "spec": {
                         "network": {"host": "127.0.0.1", "port": 3000},
