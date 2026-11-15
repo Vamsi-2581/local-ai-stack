@@ -47,7 +47,7 @@ class LibreChatFrontendTests(unittest.TestCase):
         spec = build_service_spec(plan, config)
         self.assertIsNotNone(spec)
         self.assertEqual(spec["provider"], "librechat")
-        self.assertEqual(spec["upstream"], GATEWAY_URL)
+            self.assertEqual(spec["upstream"], {"host": "127.0.0.1", "port": 8080}))
         self.assertTrue(spec["data_dir"].endswith("/librechat-data"))
         self.assertTrue(spec["mongo_data_dir"].endswith("/librechat-mongo"))
         self.assertTrue(spec["config_path"].endswith("/librechat-data/librechat.yaml"))
