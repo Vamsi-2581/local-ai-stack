@@ -41,7 +41,7 @@ class LibreChatFrontendTests(unittest.TestCase):
     def test_build_service_spec_enabled_and_disabled(self):
         config = self._sample_config()
         config["gateway"] = {"host": "127.0.0.1", "port": 8080}
-        config["network"].update({"api_host": "127.0.0.1", "api_port": 8080})
+        config["network"].update({"api_host": "127.0.0.1", "api_port": 8080, "inference_host": "127.0.0.1", "inference_port": 8000})
 
         plan = {"frontend": {"enabled": True, "provider": "librechat"}, "gateway": {"enabled": True, "provider": "builtin_proxy"}}
         spec = build_service_spec(plan, config)
