@@ -26,6 +26,8 @@ class LibreChatFrontendTests(unittest.TestCase):
                 "frontend_port": 3080,
                 "gateway_host": "127.0.0.1",
                 "gateway_port": 8080,
+            "inference_host": "127.0.0.1",
+                "inference_port": 11434,
             },
             "platform": {
                 "data_root": data_root,
@@ -86,7 +88,7 @@ class LibreChatFrontendTests(unittest.TestCase):
         }
         cmds = executor.build_deployment_commands(librechat_manifest)
         self.assertEqual(len(cmds), 3)
-        joined = "\n".join(cmds)
+        joined = "\n".join(" ".join(c) for c in cmds)
         self.assertIn("ai-stack-librechat-mongo", joined)
         self.assertIn("/var/lib/ai-stack/librechat-mongo:/data/db", joined)
         self.assertIn("ai-stack-frontend", joined)
@@ -117,7 +119,7 @@ class LibreChatFrontendTests(unittest.TestCase):
         frontend_cmds = [c for c in ow_cmds if "ai-stack-frontend" in c or "ai-stack-librechat-mongo" in c]
         self.assertEqual(len(frontend_cmds), 1)
         self.assertIn("ai-stack-frontend", frontend_cmds[0])
-        self.assertNotIn("ai-stack-librechat-mongo", "\n".join(ow_cmds))
+        self.assertNotIn("ai-stack-librechat-mongo", "\n".join(" ".join(c) for c in ow_cmds))
 
     def test_check_service_health_librechat(self):
         service = {
