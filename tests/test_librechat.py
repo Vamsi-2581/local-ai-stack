@@ -158,7 +158,7 @@ class LibreChatFrontendTests(unittest.TestCase):
             config["platform"]["data_root"] = tmpdir
             config["platform_api"]["enabled"] = False
             plan = {
-                "inference": {"provider": "ollama", "model": {"id": "llama3.1:8b", "path": "/models/llama", "served_name": "llama"}},
+                "inference": {"provider": "vllm", "model": {"id": "llama3.1:8b", "path": "/models/llama", "served_name": "llama"}},
                 "gateway": {"provider": "litellm"},
                 "frontend": {"enabled": True, "provider": "librechat"},
             }
