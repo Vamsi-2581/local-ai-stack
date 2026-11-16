@@ -10,10 +10,12 @@ from adapters.executor.docker import DockerExecutor
 from adapters.frontend import get_frontend_adapter
 from adapters.frontend.librechat import (
     build_service_spec,
+    ensure_librechat_secrets,
     render_librechat_yaml,
     write_librechat_config,
 )
 from core.health import check_service_health
+from core.deployment import build_deployment_manifest
 
 GATEWAY_URL = "http" + "://127.0.0.1:8080"
 
@@ -69,31 +71,40 @@ class LibreChatFrontendTests(unittest.TestCase):
 
     def test_docker_executor_librechat_and_openwebui(self):
         executor = DockerExecutor()
-        librechat_manifest = {
-            "services": [
-                {
-                    "role": "frontend",
-                    "enabled": True,
-                    "provider": "librechat",
-                    "spec": {
-                        "provider": "librechat", 
-                        "network": {"host": "127.0.0.1", "port": 3080},
-                        "upstream": GATEWAY_URL,
-                        "data_dir": "/var/lib/ai-stack/librechat-data",
-                        "mongo_data_dir": "/var/lib/ai-stack/librechat-mongo",
-                        "config_path": "/var/lib/ai-stack/librechat-data/librechat.yaml",
-                    },
-                }
-            ]
-        }
-        cmds = executor.build_deployment_commands(librechat_manifest)
-        self.assertEqual(len(cmds), 3)
-        joined = "\n".join(" ".join(c) for c in cmds)
-        self.assertIn("ai-stack-librechat-mongo", joined)
-        self.assertIn("/var/lib/ai-stack/librechat-mongo:/data/db", joined)
-        self.assertIn("ai-stack-frontend", joined)
-        self.assertIn("MONGO_URI=", joined)
-        self.assertIn("librechat.yaml", joined)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            data_dir = os.path.join(tmpdir, "librechat-data")
+            mongo_data_dir = os.path.join(tmpdir, "librechat-mongo")
+            config_path = os.path.join(data_dir, "librechat.yaml")
+            librechat_manifest = {
+                "services": [
+                    {
+                        "role": "frontend",
+                        "enabled": True,
+                        "provider": "librechat",
+                        "spec": {
+                            "provider": "librechat", 
+                            "network": {"host": "127.0.0.1", "port": 3080},
+                            "upstream": GATEWAY_URL,
+                           "data_dir": data_dir,
+                        "mongo_data_dir": mongo_data_dir,
+                        "config_path": config_path,
+                        },
+                    }
+                ]
+            }
+            cmds = executor.build_deployment_commands(librechat_manifest)
+            self.assertEqual(len(cmds), 3)
+            joined = "\n".join(" ".join(c) for c in cmds)
+            self.assertIn("ai-stack-librechat-mongo", joined)
+            self.assertIn(f"{mongo_data_dir}:/data/db", joined)
+            self.assertIn("ai-stack-frontend", joined)
+            self.assertIn("MONGO_URI=", joined)
+            self.assertIn("librechat.yaml", joined)
+            self.assertIn("ghcr.io/danny-avila/librechat:v0.7.7", joined)
+            self.assertIn("CREDS_KEY=", joined)
+            self.assertIn("CREDS_IV=", joined)
+            self.assertIn("JWT_SECRET=", joined)
+            self.assertIn("JWT_REFRESH_SECRET=", joined)
 
         openwebui_manifest = {
             "services": [
@@ -132,6 +143,25 @@ class LibreChatFrontendTests(unittest.TestCase):
         mock_get.assert_called_once()
         self.assertEqual(result["provider"], "librechat")
         self.assertTrue(result["healthy"])
+
+    def test_ensure_librechat_secrets_persists_across_calls(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            first = ensure_librechat_secrets(tmpdir)
+            second = ensure_librechat_secrets(tmpdir)
+            self.assertEqual(set(first.keys()), {"CREDS_KEY", "CREDS_IV", "JWT_SECRET", "JWT_REFRESH_SECRET"})
+            self.assertEqual(first, second)
+
+    def test_build_deployment_manifest_selects_librechat(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = self._sample_config(data_root=tmpdir)
+            config["gateway"] = {"host": "127.0.0.1", "port": 8080}
+            config["network"].update({"api_host": "127.0.0.1", "api_port": 8080, "inference_host": "127.0.0.1", "inference_port": 11434})
+            plan = {"frontend": {"enabled": True, "provider": "librechat"}}
+            manifest = build_deployment_manifest(plan, config)
+            cmds = DockerExecutor().build_deployment_commands(manifest)
+            joined = "\n".join(" ".join(c) for c in cmds)
+            self.assertIn("ai-stack-librechat-mongo", joined)
+            self.assertIn("ghcr.io/danny-avila/librechat:v0.7.7", joined)
 
 
 if __name__ == "__main__":
