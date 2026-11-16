@@ -16,6 +16,7 @@ from adapters.frontend.librechat import (
 )
 from core.health import check_service_health
 from core.deployment import build_deployment_manifest
+from core.config import load_config
 
 GATEWAY_URL = "http" + "://127.0.0.1:8080"
 
@@ -153,10 +154,14 @@ class LibreChatFrontendTests(unittest.TestCase):
 
     def test_build_deployment_manifest_selects_librechat(self):
         with tempfile.TemporaryDirectory() as tmpdir:
-            config = self._sample_config(data_root=tmpdir)
-            config["gateway"] = {"host": "127.0.0.1", "port": 8080}
-            config["network"].update({"api_host": "127.0.0.1", "api_port": 8080, "inference_host": "127.0.0.1", "inference_port": 11434})
-            plan = {"frontend": {"enabled": True, "provider": "librechat"}}
+           config = load_config()
+            config["storage"]["data_root"] = tmpdir
+            config["platform_api"]["enabled"] = False
+            plan = {
+                "inference": {"provider": "ollama", "model": {"id": "llama3.1:8b", "path": "/models/llama", "served_name": "llama"}},
+                "gateway": {"provider": "litellm"},
+                "frontend": {"enabled": True, "provider": "librechat"},
+            }
             manifest = build_deployment_manifest(plan, config)
             cmds = DockerExecutor().build_deployment_commands(manifest)
             joined = "\n".join(" ".join(c) for c in cmds)
