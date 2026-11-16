@@ -155,7 +155,6 @@ class LibreChatFrontendTests(unittest.TestCase):
     def test_build_deployment_manifest_selects_librechat(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             config = load_config()
-            config["storage"]["data_root"] = tmpdir
             config["platform"]["data_root"] = tmpdir
             config["platform_api"]["enabled"] = False
             plan = {
