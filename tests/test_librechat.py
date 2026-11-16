@@ -159,7 +159,7 @@ class LibreChatFrontendTests(unittest.TestCase):
             config["platform_api"]["enabled"] = False
             plan = {
                 "inference": {"provider": "vllm", "model": {"id": "llama3.1:8b", "path": "/models/llama", "served_name": "llama"}},
-                "gateway": {"provider": "builtin_proxy"},
+                "gateway": {"provider": "direct"},
                 "selected_model": {"name": "test-model", "path": "/workspace/models/test-model"},
                 "performance": {"context_length": 4096, "gpu_memory_utilization": 0.9, "concurrency": 1},
                 "frontend": {"enabled": True, "provider": "librechat"},
