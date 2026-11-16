@@ -1,3 +1,6 @@
+import json
+import os
+import secrets
 from pathlib import Path
 
 from adapters.gateway import (
@@ -82,3 +85,21 @@ def build_service_spec(plan, config):
         "mongo_data_dir": f"{data_root}/librechat-mongo",
         "config_path": f"{data_dir}/librechat.yaml",
     }
+
+
+def ensure_librechat_secrets(data_dir):
+    target_dir = Path(data_dir)
+    target_dir.mkdir(parents=True, exist_ok=True)
+    secrets_path = target_dir / "librechat-secrets.json"
+    if secrets_path.exists():
+        return json.loads(secrets_path.read_text(encoding="utf-8"))
+    generated = {
+        "CREDS_KEY": secrets.token_hex(16),
+        "CREDS_IV": secrets.token_hex(8),
+        "JWT_SECRET": secrets.token_hex(32),
+        "JWT_REFRESH_SECRET": secrets.token_hex(32),
+    }
+    secrets_path.write_text(json.dumps(generated, indent=2), encoding="utf-8")
+    os.chmod(secrets_path, 0o600)
+    return generated
+    
