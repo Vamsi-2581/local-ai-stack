@@ -156,6 +156,7 @@ class LibreChatFrontendTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
            config = load_config()
             config["storage"]["data_root"] = tmpdir
+            config["platform"]["data_root"] = tmpdir
             config["platform_api"]["enabled"] = False
             plan = {
                 "inference": {"provider": "ollama", "model": {"id": "llama3.1:8b", "path": "/models/llama", "served_name": "llama"}},
